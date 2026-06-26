@@ -4,20 +4,28 @@ import { View, Button } from 'react-native';
 export default function Home({navigation}){
 
 
-return(
+    return(
 
-<View>
+        <View>
 
-<Button
+            <Button
 
-title="Ver atletas"
+                title="Ver atletas"
 
-onPress={() => navigation.navigate('Atleta')}
+                onPress={() => navigation.navigate('Atletas')}
 
-/>
+            />
 
-</View>
+            <Button
 
-);
+                title="Agenda"
+
+                onPress={() => navigation.navigate('Agenda')}
+
+            />
+
+        </View>
+
+    );
 
 }

@@ -1,142 +1,69 @@
 import * as SQLite from 'expo-sqlite';
 
-
 export const db = SQLite.openDatabaseSync('linces.db');
-
-
 
 export function crearTablas() {
 
     db.execSync(`
 
-        CREATE TABLE IF NOT EXISTS atletas (
+        CREATE TABLE IF NOT EXISTS atletas(
 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-            codigo TEXT,
             nombre TEXT,
+
             apellido TEXT,
+
             fechaNacimiento TEXT,
+
             categoria TEXT,
+
             disciplina TEXT,
+
             grupo TEXT,
+
             activo INTEGER
+
+        );
+
+        CREATE TABLE IF NOT EXISTS sesiones(
+
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            fecha TEXT,
+
+            horaInicio TEXT,
+
+            horaFin TEXT,
+
+            lugar TEXT,
+
+            grupo TEXT,
+
+            descripcion TEXT,
+
+            estado TEXT,
+
+            motivo TEXT
+
+        );
+
+        CREATE TABLE IF NOT EXISTS asistencias(
+
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            sesionId INTEGER,
+
+            atletaId INTEGER,
+
+            estado TEXT,
+
+            fechaRegistro TEXT
 
         );
 
     `);
 
-}
-
-
-
-
-
-export function insertarAtleta(
-    nombre,
-    apellido,
-    fechaNacimiento,
-    disciplina,
-    grupo
-) {
-
-
-    const resultado = db.runSync(
-
-        `
-        INSERT INTO atletas
-        (
-            nombre,
-            apellido,
-            fechaNacimiento,
-            categoria,
-            disciplina,
-            grupo,
-            activo
-        )
-
-        VALUES
-        (
-            ?,
-            ?,
-            ?,
-            ?,
-            ?,
-            ?,
-            ?
-        )
-
-        `,
-
-        [
-
-            nombre,
-
-            apellido,
-
-            fechaNacimiento,
-
-            "Pendiente",
-
-            disciplina,
-
-            grupo,
-
-            1
-
-        ]
-
-    );
-
-
-
-    const id = resultado.lastInsertRowId;
-
-
-
-    db.runSync(
-
-        `
-        UPDATE atletas
-
-        SET codigo = ?
-
-        WHERE id = ?
-
-        `,
-
-        [
-
-            "ATL-" + String(id).padStart(3,"0"),
-
-            id
-
-        ]
-
-    );
-
-
-}
-
-
-
-
-
-export function obtenerAtletas() {
-
-
-    return db.getAllSync(
-
-        `
-        SELECT *
-
-        FROM atletas
-
-        WHERE activo = 1
-
-        `
-
-    );
-
+    
 
 }
