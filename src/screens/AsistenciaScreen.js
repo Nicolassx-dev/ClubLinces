@@ -19,7 +19,8 @@ import {
 
 
 import {
-    registrarAsistencia
+    registrarAsistencia,
+    existeAsistenciaSesion
 } from '../services/asistenciaService';
 
 
@@ -38,6 +39,8 @@ export default function AsistenciaScreen({ route }) {
 
 
     const [asistencias,setAsistencias] = useState({});
+
+    const [soloLectura, setSoloLectura] = useState(false);
 
 
 
@@ -58,13 +61,21 @@ export default function AsistenciaScreen({ route }) {
 
     function cargarAtletas(){
 
-
         setAtletas(
 
             obtenerAtletasPorGrupo(sesion.grupo)
 
         );
 
+
+
+        setSoloLectura(
+
+            existeAsistenciaSesion(
+                sesion.id
+            )
+
+        );
 
     }
 
@@ -76,7 +87,11 @@ export default function AsistenciaScreen({ route }) {
 
     function marcar(id, estado){
 
+        if(soloLectura){
 
+            return;
+
+        }
 
         setAsistencias({
 
@@ -85,7 +100,6 @@ export default function AsistenciaScreen({ route }) {
             [id]: estado
 
         });
-
 
     }
 
@@ -126,9 +140,54 @@ export default function AsistenciaScreen({ route }) {
 
         });
 
-
+        setSoloLectura(true);
 
     }
+
+    function calcularPorcentaje(){
+
+
+    let total = atletas.length;
+
+
+    let presentes = 0;
+
+
+
+    atletas.forEach((atleta)=>{
+
+
+        if(
+            asistencias[atleta.id] === "P"
+        ){
+
+            presentes++;
+
+        }
+
+
+    });
+
+
+
+
+    if(total === 0){
+
+        return 0;
+
+    }
+
+
+
+
+    return Math.round(
+
+        (presentes / total) * 100
+
+    );
+
+
+}
 
 
 
@@ -288,21 +347,24 @@ export default function AsistenciaScreen({ route }) {
 
             />
 
+                <Text>
 
+                    Porcentaje asistencia:
+                    {calcularPorcentaje()}%
 
+                </Text>
 
+                {
+                    !soloLectura &&
 
+                    <Button
 
-            <Button
+                        title="Guardar asistencia"
 
+                        onPress={guardar}
 
-                title="Guardar asistencia"
-
-
-                onPress={guardar}
-
-
-            />
+                    />
+                }
 
 
 

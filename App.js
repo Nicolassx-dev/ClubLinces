@@ -27,6 +27,11 @@ import EditarSesionScreen from './src/screens/EditarSesionScreen';
 
 import DetalleSesionScreen from './src/screens/DetalleSesionScreen';
 
+import AsistenciaScreen from './src/screens/AsistenciaScreen';
+
+import RegistrarRendimientoScreen from './src/screens/RegistrarRendimientoScreen';
+
+import SeleccionarAtletaScreen from './src/screens/SeleccionarAtletaScreen';
 
 import { crearTablas } from './src/database/database';
 
@@ -144,6 +149,20 @@ export default function App(){
 
                     component={DetalleSesionScreen}
 
+                />
+
+                <Stack.Screen
+                    name="Asistencia"
+                    component={AsistenciaScreen}
+                />
+
+                <Stack.Screen
+                    name="RegistrarRendimiento"
+                    component={RegistrarRendimientoScreen}
+                />
+                <Stack.Screen
+                    name="SeleccionarAtleta"
+                    component={SeleccionarAtletaScreen}
                 />
 
             </Stack.Navigator>

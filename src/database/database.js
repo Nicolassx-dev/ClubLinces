@@ -61,7 +61,24 @@ export function crearTablas() {
             fechaRegistro TEXT
 
         );
+        
+        CREATE TABLE IF NOT EXISTS rendimientos(
 
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            atletaId INTEGER,
+
+            sesionId INTEGER,
+
+            disciplina TEXT,
+
+            resultado REAL,
+
+            fecha TEXT,
+            
+            marcaPersonal INTEGER
+
+        );
     `);
 
     

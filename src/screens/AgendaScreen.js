@@ -203,13 +203,6 @@ export default function AgendaScreen({ navigation }) {
 
                         />
 
-                        <Button
-
-                          title="Cancelar sesión"
-
-                           onPress={() => cancelar(item.id)}
-
-                        />
 
                     </View>
 

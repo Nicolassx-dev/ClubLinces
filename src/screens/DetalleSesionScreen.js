@@ -183,6 +183,28 @@ export default function DetalleSesionScreen({ route, navigation }) {
 
 
             />
+            
+            <Button
+
+                title="Registrar marcas"
+
+                onPress={() =>
+
+                    navigation.navigate(
+
+                        "SeleccionarAtleta",
+
+                        {
+
+                            sesion
+
+                        }
+
+                    )
+
+                }
+
+            />
 
 
 

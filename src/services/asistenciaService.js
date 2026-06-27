@@ -54,3 +54,31 @@ export function obtenerAsistenciasPorSesion(sesionId) {
     );
 
 }
+
+export function existeAsistenciaSesion(sesionId){
+
+    const resultado = db.getFirstSync(
+
+        `
+        SELECT id
+
+        FROM asistencias
+
+        WHERE sesionId = ?
+
+        LIMIT 1
+        `,
+
+        [
+
+            sesionId
+
+        ]
+
+    );
+
+
+
+    return resultado !== null;
+
+}
