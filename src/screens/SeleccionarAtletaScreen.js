@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 
 import {
-    obtenerAtletasPorGrupo
+    obtenerAtletasPorGrupo,
+    obtenerAtletas
 } from '../services/atletaService';
 
 
@@ -18,7 +19,7 @@ import {
 export default function SeleccionarAtletaScreen({ route, navigation }) {
 
 
-    const { sesion } = route.params;
+    const { sesion } = route.params || {};
 
 
     const [atletas, setAtletas] = useState([]);
@@ -39,14 +40,27 @@ export default function SeleccionarAtletaScreen({ route, navigation }) {
 
     function cargarAtletas() {
 
-        setAtletas(
+        if (sesion) {
+            setAtletas(
+                obtenerAtletasPorGrupo(sesion.grupo)
+            );
+        } else {
+            setAtletas(obtenerAtletas());
+        }
 
-            obtenerAtletasPorGrupo(
-                sesion.grupo
-            )
+    }
 
-        );
-
+    function handleSeleccionar(item) {
+        if (sesion) {
+            navigation.navigate("RegistrarRendimiento", {
+                atleta: item,
+                sesion
+            });
+        } else {
+            navigation.navigate("DetalleRendimiento", {
+                atleta: item
+            });
+        }
     }
 
 
@@ -72,23 +86,7 @@ export default function SeleccionarAtletaScreen({ route, navigation }) {
 
                     <TouchableOpacity
 
-                        onPress={() =>
-
-                            navigation.navigate(
-
-                                "RegistrarRendimiento",
-
-                                {
-
-                                    atleta: item,
-
-                                    sesion
-
-                                }
-
-                            )
-
-                        }
+                        onPress={() => handleSeleccionar(item)}
 
                     >
 

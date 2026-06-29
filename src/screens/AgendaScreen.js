@@ -1,225 +1,234 @@
-// src/screens/AgendaScreen.js
-//
-// HU-05 — Consultar agenda semanal
-// Crit. 3: sesión cancelada aparece tachada con etiqueta CANCELADO y motivo.
-// Crit. 4: sin entrenamientos → mensaje "Sin entrenamientos esta semana".
-
 import React, { useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-
-import {
-    View,
-    Text,
-    Button,
-    FlatList,
-    StyleSheet
-} from 'react-native';
-
+import { View, Text, FlatList, TouchableOpacity, ScrollView, StyleSheet, StatusBar } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { obtenerSesiones } from '../services/agendaService';
+import { filtrarSesionesSemana, obtenerRangoSemana } from '../services/agendaUtils';
 
-import {
-    filtrarSesionesSemana,
-    obtenerRangoSemana
-} from '../services/agendaUtils';
+const GRANATE = '#7A1F3B';
+const DIAS    = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
+function getLunesDeSemana(fecha) {
+    const d = new Date(fecha);
+    const dia = d.getDay();
+    const diff = dia === 0 ? -6 : 1 - dia;
+    d.setDate(d.getDate() + diff);
+    d.setHours(0,0,0,0);
+    return d;
+}
 
+function diasDeSemana(lunes) {
+    return Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(lunes);
+        d.setDate(d.getDate() + i);
+        return d;
+    });
+}
+
+function toStr(fecha) {
+    const dd   = String(fecha.getDate()).padStart(2,'0');
+    const mm   = String(fecha.getMonth()+1).padStart(2,'0');
+    const yyyy = fecha.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+}
 
 export default function AgendaScreen({ navigation }) {
 
-    const [sesiones, setSesiones] = useState([]);
-    const [fechaActual, setFechaActual] = useState(new Date());
-
-
+    const [todasSesiones, setTodasSesiones] = useState([]);
+    const [fechaActual,   setFechaActual]   = useState(new Date());
+    const [diaSeleccionado, setDiaSeleccionado] = useState(new Date());
 
     useFocusEffect(
-        React.useCallback(() => {
-            cargarSesiones();
-        }, [fechaActual])
+        React.useCallback(() => { cargarSesiones(); }, [fechaActual])
     );
 
-
-
     function cargarSesiones() {
+        setTodasSesiones(obtenerSesiones());
+    }
 
-        const todas = obtenerSesiones();
+    const lunes   = getLunesDeSemana(fechaActual);
+    const semana  = diasDeSemana(lunes);
 
-        setSesiones(
-            filtrarSesionesSemana(todas, fechaActual)
-        );
+    // Sesiones del día seleccionado
+    const sesionesDia = todasSesiones.filter(s => s.fecha === toStr(diaSeleccionado));
+
+    // Puntos por día (tiene sesiones)
+    function tieneSesiones(fecha) {
+        return todasSesiones.some(s => s.fecha === toStr(fecha));
     }
 
     function semanaAnterior() {
-        const nueva = new Date(fechaActual);
-        nueva.setDate(nueva.getDate() - 7);
-        setFechaActual(nueva);
+        const n = new Date(fechaActual);
+        n.setDate(n.getDate() - 7);
+        setFechaActual(n);
+        setDiaSeleccionado(getLunesDeSemana(n));
     }
 
     function semanaSiguiente() {
-        const nueva = new Date(fechaActual);
-        nueva.setDate(nueva.getDate() + 7);
-        setFechaActual(nueva);
+        const n = new Date(fechaActual);
+        n.setDate(n.getDate() + 7);
+        setFechaActual(n);
+        setDiaSeleccionado(getLunesDeSemana(n));
     }
 
-
-
-    function renderSesion({ item }) {
-
-        const estaCancelada = item.estado === "CANCELADA";
-
-        return (
-
-            <View
-                style={[
-                    styles.card,
-                    estaCancelada && styles.cardCancelada
-                ]}
-            >
-                {/* HU-05 crit. 3: etiqueta CANCELADO */}
-                {estaCancelada && (
-                    <Text style={styles.chipCancelado}>CANCELADO</Text>
-                )}
-
-                {/* HU-05 crit. 3: texto tachado si cancelada */}
-                <Text
-                    style={[
-                        styles.textoInfo,
-                        estaCancelada && styles.tachado
-                    ]}
-                >
-                    {item.fecha}{"\n"}
-                    {item.horaInicio} - {item.horaFin}{"\n"}
-                    {item.lugar}{"\n"}
-                    {item.grupo}{"\n"}
-                    {item.descripcion}
-                </Text>
-
-                {/* HU-05 crit. 3: motivo de cancelación */}
-                {estaCancelada && item.motivo ? (
-                    <Text style={styles.textoMotivo}>
-                        Motivo: {item.motivo}
-                    </Text>
-                ) : null}
-
-                {/* Botón solo para sesiones no canceladas */}
-                {!estaCancelada && (
-                    <Button
-                        title="Ver sesión"
-                        onPress={() =>
-                            navigation.navigate("DetalleSesion", { sesion: item })
-                        }
-                    />
-                )}
-            </View>
-        );
-    }
-
-
+    const hoyStr = toStr(new Date());
 
     return (
+        <View style={s.root}>
+            <StatusBar barStyle="light-content" backgroundColor={GRANATE} />
 
-        <View style={styles.contenedor}>
-
-            <Button
-                title="Crear Sesión"
-                onPress={() => navigation.navigate("CrearSesion")}
-            />
-
-            <View style={styles.filaSemana}>
-                <Button title="◀" onPress={semanaAnterior} />
-                <Text style={styles.textoSemana}>
-                    {obtenerRangoSemana(fechaActual)}
-                </Text>
-                <Button title="▶" onPress={semanaSiguiente} />
+           
+            <View style={s.header}>
+                <View>
+                    <Text style={s.titulo}>Agenda semanal</Text>
+                    <Text style={s.subtitulo}>{obtenerRangoSemana(fechaActual)}</Text>
+                </View>
+                <TouchableOpacity style={s.btnAdd} onPress={() => navigation.navigate('CrearSesion')}>
+                    <Ionicons name="add" size={22} color="#fff" />
+                </TouchableOpacity>
             </View>
 
-            <FlatList
-                data={sesiones}
-                keyExtractor={(item) => item.id.toString()}
-                contentContainerStyle={{ paddingBottom: 30 }}
-                renderItem={renderSesion}
+            {/* ── Selector de semana ── */}
+            <View style={s.selectorSemana}>
+                <TouchableOpacity onPress={semanaAnterior} style={s.btnFlecha}>
+                    <Ionicons name="chevron-back" size={20} color="#fff" />
+                </TouchableOpacity>
 
-                // HU-05 crit. 4
-                ListEmptyComponent={
-                    <Text style={styles.textoVacio}>
-                        Sin entrenamientos esta semana.
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.diasRow}>
+                    {semana.map((fecha, idx) => {
+                        const seleccionado = toStr(fecha) === toStr(diaSeleccionado);
+                        const esHoy        = toStr(fecha) === hoyStr;
+                        return (
+                            <TouchableOpacity
+                                key={idx}
+                                style={[s.diaBtn, seleccionado && s.diaBtnActivo]}
+                                onPress={() => setDiaSeleccionado(fecha)}
+                            >
+                                <Text style={[s.diaNombre, seleccionado && s.diaTextoActivo]}>
+                                    {DIAS[(idx + 1) % 7]}
+                                </Text>
+                                <Text style={[s.diaNum, seleccionado && s.diaTextoActivo, esHoy && !seleccionado && { color: '#ffb3b3' }]}>
+                                    {fecha.getDate()}
+                                </Text>
+                                {tieneSesiones(fecha) && (
+                                    <View style={[s.punto, seleccionado && { backgroundColor: '#fff' }]} />
+                                )}
+                            </TouchableOpacity>
+                        );
+                    })}
+                </ScrollView>
+
+                <TouchableOpacity onPress={semanaSiguiente} style={s.btnFlecha}>
+                    <Ionicons name="chevron-forward" size={20} color="#fff" />
+                </TouchableOpacity>
+            </View>
+
+          
+            <View style={s.body}>
+
+                {/* Encabezado del día */}
+                <View style={s.diaHeader}>
+                    <Text style={s.diaHeaderTexto}>
+                        {diaSeleccionado.toLocaleDateString('es-BO', { weekday: 'short', day: 'numeric', month: 'long' })}
                     </Text>
-                }
-            />
+                    {sesionesDia.length > 0 && (
+                        <View style={s.chipCount}>
+                            <Text style={s.chipCountTexto}>{sesionesDia.length} sesiones</Text>
+                        </View>
+                    )}
+                </View>
 
+                <FlatList
+                    data={sesionesDia}
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={{ paddingBottom: 30 }}
+                    renderItem={({ item }) => {
+                        const cancelada = item.estado === 'CANCELADA';
+                        return (
+                            <TouchableOpacity
+                                style={[s.card, cancelada && s.cardCancelada]}
+                                onPress={() => !cancelada && navigation.navigate('DetalleSesion', { sesion: item })}
+                                activeOpacity={cancelada ? 1 : 0.7}
+                            >
+                                <View style={[s.cardBorde, { backgroundColor: cancelada ? '#aaa' : GRANATE }]} />
+                                <View style={{ flex: 1 }}>
+                                    <View style={s.cardTop}>
+                                        <Text style={[s.cardGrupo, cancelada && s.tachado]}>
+                                            {item.grupo}
+                                        </Text>
+                                        {cancelada ? (
+                                            <View style={s.chipCancelado}><Text style={s.chipCanceladoTexto}>CANCELADO</Text></View>
+                                        ) : (
+                                            <View style={s.chipDesc}><Text style={s.chipDescTexto}>{item.descripcion}</Text></View>
+                                        )}
+                                    </View>
+                                    <View style={s.cardMeta}>
+                                        <Ionicons name="time-outline" size={13} color="#888" />
+                                        <Text style={[s.cardMetaTexto, cancelada && s.tachado]}>
+                                            {' '}{item.horaInicio}–{item.horaFin}
+                                        </Text>
+                                        <Ionicons name="location-outline" size={13} color="#888" style={{ marginLeft: 10 }} />
+                                        <Text style={[s.cardMetaTexto, cancelada && s.tachado]}>
+                                            {' '}{item.lugar}
+                                        </Text>
+                                    </View>
+                                    {cancelada && item.motivo ? (
+                                        <Text style={s.motivoTexto}>Motivo: {item.motivo}</Text>
+                                    ) : (
+                                        <Text style={s.registrarTexto}>Tocar para ver detalle →</Text>
+                                    )}
+                                </View>
+                            </TouchableOpacity>
+                        );
+                    }}
+                    ListEmptyComponent={
+                        <Text style={s.vacio}>Sin entrenamientos este día.</Text>
+                    }
+                />
+            </View>
         </View>
     );
 }
 
+const s = StyleSheet.create({
+    root:   { flex: 1, backgroundColor: '#f5f5f5' },
 
+    header: { backgroundColor: GRANATE, paddingTop: 50, paddingBottom: 12, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+    titulo: { color: '#fff', fontSize: 22, fontWeight: 'bold' },
+    subtitulo: { color: 'rgba(255,255,255,0.7)', fontSize: 13, marginTop: 2 },
+    btnAdd: { width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
 
-const styles = StyleSheet.create({
+    selectorSemana: { backgroundColor: GRANATE, flexDirection: 'row', alignItems: 'center', paddingBottom: 14, paddingHorizontal: 4 },
+    btnFlecha: { padding: 8 },
+    diasRow:   { flexDirection: 'row', gap: 4, paddingHorizontal: 4 },
+    diaBtn:    { alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, minWidth: 40 },
+    diaBtnActivo: { backgroundColor: 'rgba(255,255,255,0.25)' },
+    diaNombre: { color: 'rgba(255,255,255,0.6)', fontSize: 11 },
+    diaNum:    { color: '#fff', fontSize: 17, fontWeight: 'bold', marginTop: 2 },
+    diaTextoActivo: { color: '#fff' },
+    punto:     { width: 5, height: 5, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.6)', marginTop: 3 },
 
-    contenedor: {
-        flex: 1,
-        padding: 20
-    },
+    body:      { flex: 1, backgroundColor: '#f5f5f5', paddingTop: 16 },
+    diaHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, marginBottom: 12 },
+    diaHeaderTexto: { fontWeight: 'bold', fontSize: 16, color: '#1a1a1a', textTransform: 'capitalize' },
+    chipCount: { backgroundColor: '#e8e8e8', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
+    chipCountTexto: { fontSize: 12, color: '#555' },
 
-    filaSemana: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginVertical: 12
-    },
+    card:        { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 12, marginHorizontal: 16, marginBottom: 12, overflow: 'hidden' },
+    cardCancelada: { opacity: 0.7 },
+    cardBorde:   { width: 4 },
+    cardTop:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, paddingBottom: 4 },
+    cardGrupo:   { fontWeight: 'bold', fontSize: 15, color: '#1a1a1a', flex: 1 },
+    cardMeta:    { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingBottom: 4 },
+    cardMetaTexto: { fontSize: 13, color: '#666' },
+    tachado:     { textDecorationLine: 'line-through', color: '#aaa' },
 
-    textoSemana: {
-        fontWeight: "bold",
-        fontSize: 14,
-        flex: 1,
-        textAlign: "center"
-    },
+    chipDesc:    { backgroundColor: '#f0f0f0', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
+    chipDescTexto: { fontSize: 11, color: '#555' },
+    chipCancelado: { backgroundColor: '#c0392b', borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
+    chipCanceladoTexto: { fontSize: 11, color: '#fff', fontWeight: 'bold' },
 
-    card: {
-        marginTop: 16,
-        padding: 12,
-        borderWidth: 1,
-        borderRadius: 8,
-        borderColor: "#ccc"
-    },
-
-    // HU-05 crit. 3: fondo levemente grisado para canceladas
-    cardCancelada: {
-        backgroundColor: "#f5f5f5",
-        borderColor: "#aaa"
-    },
-
-    chipCancelado: {
-        color: "#fff",
-        backgroundColor: "#c0392b",
-        alignSelf: "flex-start",
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 4,
-        fontSize: 11,
-        fontWeight: "bold",
-        marginBottom: 6
-    },
-
-    textoInfo: {
-        fontSize: 14,
-        color: "#333"
-    },
-
-    // HU-05 crit. 3: texto tachado
-    tachado: {
-        textDecorationLine: "line-through",
-        color: "#888"
-    },
-
-    textoMotivo: {
-        marginTop: 6,
-        color: "#c0392b",
-        fontSize: 13,
-        fontStyle: "italic"
-    },
-
-    textoVacio: {
-        marginTop: 40,
-        textAlign: "center",
-        color: "#888"
-    }
+    registrarTexto: { fontSize: 12, color: GRANATE, paddingHorizontal: 12, paddingBottom: 10, marginTop: 2 },
+    motivoTexto:    { fontSize: 12, color: '#c0392b', paddingHorizontal: 12, paddingBottom: 10, fontStyle: 'italic' },
+    vacio: { textAlign: 'center', color: '#aaa', marginTop: 40 },
 });
