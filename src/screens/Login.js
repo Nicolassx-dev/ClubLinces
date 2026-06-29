@@ -2,10 +2,10 @@ import {
     View,
     Text,
     TextInput,
-    Button,
     Alert,
     StyleSheet,
-    TouchableOpacity
+    TouchableOpacity,
+    Dimensions
 } from 'react-native';
 
 import {
@@ -143,24 +143,23 @@ export default function Login({navigation}){
                 </Text>
             </TouchableOpacity>
 
-            <Button
-                title="Ingresar"
+            <TouchableOpacity
+                style={styles.boton}
                 onPress={iniciarSesion}
-                color={COLORS.primario}
-            />
+            >
+                <Text style={styles.textoBoton}>Ingresar</Text>
+            </TouchableOpacity>
 
             {
                 mostrarRegistro &&
-                <Button
-                    title="Crear cuenta entrenador"
+                <TouchableOpacity
+                    style={styles.botonSecundario}
                     onPress={()=>
-
-                        navigation.navigate(
-                            "Registro"
-                        )
-
+                        navigation.navigate("Registro")
                     }
-                />
+                >
+                    <Text style={styles.textoBotonSecundario}>Crear cuenta entrenador</Text>
+                </TouchableOpacity>
             }
 
         </View>
@@ -170,31 +169,62 @@ export default function Login({navigation}){
 
 }
 
+const { width, height } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
     contenedor: {
         flex: 1,
-        padding: 24,
+        padding: Math.max(width * 0.06, 20),
         justifyContent: "center",
         backgroundColor: COLORS.fondo,
     },
     titulo: {
-        fontSize: 26,
+        fontSize: Math.max(width * 0.08, 28),
         fontWeight: "bold",
         color: COLORS.primario,
         textAlign: "center",
-        marginBottom: 24,
+        marginBottom: Math.max(height * 0.04, 24),
     },
     input: {
         borderWidth: 1,
         borderColor: COLORS.borde,
         borderRadius: 8,
-        padding: 12,
-        marginBottom: 12,
+        padding: Math.max(width * 0.03, 12),
+        marginBottom: Math.max(height * 0.02, 12),
         backgroundColor: COLORS.blanco,
+        fontSize: 16,
+        color: COLORS.texto,
     },
     enlace: {
         color: COLORS.primario,
         textAlign: "right",
-        marginBottom: 16,
+        marginBottom: Math.max(height * 0.025, 16),
+        fontSize: 14,
+        fontWeight: "500",
+    },
+    boton: {
+        backgroundColor: COLORS.primario,
+        padding: 14,
+        borderRadius: 8,
+        marginBottom: Math.max(height * 0.02, 12),
+        alignItems: "center",
+    },
+    textoBoton: {
+        color: COLORS.blanco,
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    botonSecundario: {
+        backgroundColor: COLORS.blanco,
+        borderWidth: 2,
+        borderColor: COLORS.primario,
+        padding: 12,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    textoBotonSecundario: {
+        color: COLORS.primario,
+        fontSize: 14,
+        fontWeight: "600",
     },
 });

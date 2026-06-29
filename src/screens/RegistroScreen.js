@@ -7,10 +7,11 @@ import {
     View,
     Text,
     TextInput,
-    Button,
     Alert,
     ScrollView,
-    StyleSheet
+    StyleSheet,
+    TouchableOpacity,
+    Dimensions
 } from 'react-native';
 
 import { Picker } from '@react-native-picker/picker';
@@ -167,6 +168,7 @@ export default function RegistroScreen({navigation}){
                 placeholder="Nombre"
                 value={nombre}
                 onChangeText={setNombre}
+                placeholderTextColor="#999"
                 style={styles.input}
             />
 
@@ -176,6 +178,7 @@ export default function RegistroScreen({navigation}){
                 onChangeText={setCorreo}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                placeholderTextColor="#999"
                 style={styles.input}
             />
 
@@ -184,6 +187,7 @@ export default function RegistroScreen({navigation}){
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
+                placeholderTextColor="#999"
                 style={styles.input}
             />
 
@@ -202,6 +206,7 @@ export default function RegistroScreen({navigation}){
             <Picker
                 selectedValue={pregunta1}
                 onValueChange={setPregunta1}
+                style={styles.picker}
             >
                 <Picker.Item label="Seleccione una pregunta" value="" />
                 {
@@ -215,6 +220,7 @@ export default function RegistroScreen({navigation}){
                 placeholder="Respuesta 1"
                 value={respuesta1}
                 onChangeText={setRespuesta1}
+                placeholderTextColor="#999"
                 style={styles.input}
             />
 
@@ -225,6 +231,7 @@ export default function RegistroScreen({navigation}){
             <Picker
                 selectedValue={pregunta2}
                 onValueChange={setPregunta2}
+                style={styles.picker}
             >
                 <Picker.Item label="Seleccione una pregunta" value="" />
                 {
@@ -240,14 +247,16 @@ export default function RegistroScreen({navigation}){
                 placeholder="Respuesta 2"
                 value={respuesta2}
                 onChangeText={setRespuesta2}
+                placeholderTextColor="#999"
                 style={styles.input}
             />
 
-            <Button
-                title="Crear cuenta"
+            <TouchableOpacity
+                style={styles.boton}
                 onPress={registrar}
-                color={COLORS.primario}
-            />
+            >
+                <Text style={styles.textoBiotn}>Crear cuenta entrenador</Text>
+            </TouchableOpacity>
 
         </ScrollView>
 
@@ -256,37 +265,66 @@ export default function RegistroScreen({navigation}){
 
 }
 
+const { width, height } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
     contenedor: {
-        padding: 20,
+        padding: Math.max(width * 0.05, 16),
         backgroundColor: COLORS.fondo,
     },
     titulo: {
-        fontSize: 22,
+        fontSize: Math.max(width * 0.06, 20),
         fontWeight: "bold",
         color: COLORS.primario,
-        marginBottom: 16,
+        marginBottom: Math.max(height * 0.02, 16),
     },
     seccion: {
-        fontSize: 16,
+        fontSize: Math.max(width * 0.045, 14),
         fontWeight: "bold",
-        marginTop: 16,
+        marginTop: Math.max(height * 0.02, 16),
         color: COLORS.texto,
     },
     ayuda: {
         color: COLORS.textoSecundario,
         marginBottom: 8,
+        fontSize: Math.max(width * 0.035, 12),
     },
     etiqueta: {
         marginTop: 10,
+        marginBottom: 5,
         color: COLORS.texto,
+        fontWeight: "600",
+        fontSize: Math.max(width * 0.04, 14),
     },
     input: {
         borderWidth: 1,
         borderColor: COLORS.borde,
         borderRadius: 8,
-        padding: 10,
+        padding: Math.max(width * 0.03, 10),
         marginBottom: 10,
         backgroundColor: COLORS.blanco,
+        fontSize: 16,
+        color: COLORS.texto,
+    },
+    picker: {
+        borderWidth: 1,
+        borderColor: COLORS.borde,
+        borderRadius: 8,
+        marginBottom: 10,
+        backgroundColor: COLORS.blanco,
+        color: COLORS.texto,
+    },
+    boton: {
+        backgroundColor: COLORS.primario,
+        padding: 14,
+        borderRadius: 8,
+        marginTop: Math.max(height * 0.03, 20),
+        marginBottom: Math.max(height * 0.02, 16),
+        alignItems: "center",
+    },
+    textoBiotn: {
+        color: COLORS.blanco,
+        fontSize: 16,
+        fontWeight: "bold",
     },
 });
